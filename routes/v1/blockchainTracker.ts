@@ -115,6 +115,25 @@ export default class BlockchainTracker {
         return formattedLogs;
     }
 
+    async formatAndAddNames(logs: any[], userAddress: string) {
+        const formattedLogs: any = [];
+        logs.map(async (event) => {
+            if (event.hasOwnProperty('args') && event.args) {
+                const foodDetails = await this.getFoodDetails(
+                    event.args.foodID
+                );
+                const logData = {
+                    sender: userAddress,
+                    foodName: foodDetails.foodName,
+                    restaurantName: foodDetails.restaurantName,
+                    date: this.convertTimeFromUnix(event.args.date),
+                };
+                formattedLogs.unshift(logData);
+            }
+        });
+        return formattedLogs;
+    }
+
     public routes(router: express.Router): void {
         // Gets buy progress count
         router.get(
@@ -136,7 +155,7 @@ export default class BlockchainTracker {
                     );
                     const logArray = [...logs];
                     const buyCount = logArray.length;
-                    const data = this.addFoodNames(logArray, userAddress);
+                    const data = this.formatAndAddNames(logArray, userAddress);
                     console.log(`Total buy count: ${buyCount}`);
                     res.send({
                         count: buyCount,
@@ -210,7 +229,7 @@ export default class BlockchainTracker {
                     const logArray = [...logs];
                     const receivedCount = logArray.length;
 
-                    const data = this.addFoodNames(logArray, userAddress);
+                    const data = this.formatAndAddNames(logArray, userAddress);
                     console.log(`Total redeem count: ${receivedCount}`);
                     res.send({
                         count: receivedCount,
