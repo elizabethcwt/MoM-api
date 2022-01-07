@@ -1,0 +1,12 @@
+{
+    "name": "mom-api",
+    "redis": "localhost",
+    "version": "v1",
+    "dbEndpoint": "mongodb://localhost/",    
+    "dbCollection": "todo-collection",
+    "dbName": "test-db",
+    "statusCode": {
+        "missing_parameters": 431,
+        "item_not_found": 432
+    }
+}
