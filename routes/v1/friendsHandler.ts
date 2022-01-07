@@ -98,7 +98,18 @@ export default class FriendsHandler {
                     const receiverProfile = await this.searchMultipleFields(
                         receiverId
                     );
+                    // Check if already friends
+                    const senderFriendsList = senderProfile[0].friends;
                     // Check for duplicate request
+                    for (let friend of senderProfile[0].friends.confirmed) {
+                        if (
+                            friend.friendUserName ===
+                            receiverProfile[0].userName
+                        ) {
+                            console.log('Already friends');
+                            throw new Error('Already friends');
+                        }
+                    }
                     if (receiverProfile[0].friends.pending.length > 0) {
                         for (let request of receiverProfile[0].friends
                             .pending) {
