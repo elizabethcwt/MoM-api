@@ -108,13 +108,13 @@ export default class UserActions {
                     const userId = req.body.userId;
                     const userPassword = req.body.userPassword;
                     // Retrieve details from database
-                    const userDetails = await this.searchDatabase({
+                    let userDetails = await this.searchDatabase({
                         userName: userId,
                     });
                     // Check if user exists, if not use email
                     if (userDetails.length === 0) {
                         console.log('Cannot find username, searching email');
-                        const userDetails = await this.searchDatabase({
+                        userDetails = await this.searchDatabase({
                             userEmail: userId,
                         });
                         if (userDetails.length === 0) {
