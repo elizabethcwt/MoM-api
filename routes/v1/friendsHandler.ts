@@ -101,7 +101,7 @@ export default class FriendsHandler {
                     // Check if already friends
                     const senderFriendsList = senderProfile[0].friends;
                     // Check for duplicate request
-                    for (let friend of senderProfile[0].friends.confirmed) {
+                    for (let friend of senderFriendsList.confirmed) {
                         if (
                             friend.friendUserName ===
                             receiverProfile[0].userName
