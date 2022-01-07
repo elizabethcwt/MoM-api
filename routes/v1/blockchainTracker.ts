@@ -106,6 +106,7 @@ export default class BlockchainTracker {
                 const logData = {
                     sender: userProfile[0].userName,
                     foodName: foodDetails.foodName,
+                    foodImageUrl: foodDetails.foodImageUrl,
                     restaurantName: foodDetails.restaurantName,
                     date: this.convertTimeFromUnix(event.args.date),
                 };
@@ -125,6 +126,7 @@ export default class BlockchainTracker {
                 const logData = {
                     sender: userAddress,
                     foodName: foodDetails.foodName,
+                    foodImageUrl: foodDetails.foodImageUrl,
                     restaurantName: foodDetails.restaurantName,
                     date: this.convertTimeFromUnix(event.args.date),
                 };
