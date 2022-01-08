@@ -2,10 +2,12 @@
 
 pragma solidity ^0.8.0;
 
+
 import './Mommom.sol';
 import './Reward.sol';
 
 contract Market {
+
     address payable admin;
 
     // WORK IN PROGRESS
@@ -49,21 +51,19 @@ contract Market {
         uint256 stocks;
     }
 
-    Mommom private mommom;
-    mapping(uint256 => MommomToken) private mommomTokens;
-    mapping(string => Food) public foods;
-    mapping(address => Customer) private customers;
+    Mommom public mommom;
+    mapping (address => uint256) public lastTokenID;
+    mapping (address => uint256[]) public lastTokenList;
+    mapping (uint256 => MommomToken) private mommomTokens;
+    mapping (string => Food) public foods;
+    mapping (address => Customer) private customers; 
 
     constructor() payable {
         mommom = new Mommom();
         admin = payable(msg.sender);
     }
 
-    function list(
-        string memory _foodID,
-        uint256 _stocks,
-        uint256 _price
-    ) public {
+    function list(string memory _foodID, uint256 _stocks, uint256 _price) public {
         Food memory food = Food({
             foodID: _foodID,
             stocks: _stocks,
@@ -72,20 +72,22 @@ contract Market {
         foods[_foodID] = food;
     }
 
-    function buy(string memory foodID) public payable returns (uint256) {
+    function buy(string memory foodID) public payable returns (uint256){
         Food storage food = foods[foodID];
-        require(msg.value >= food.price, 'Insufficient money');
-        require(food.stocks > 0, 'Insufficient stocks');
+        require(msg.value >= food.price, "Insufficient money");
+        require(food.stocks > 0, "Insufficient stocks");
         uint256 tokenID = mommom.buy(msg.sender, foodID); // mint token
         food.stocks = food.stocks - 1;
-        MommomToken memory mommomToken = MommomToken({
+        MommomToken memory mommomToken = MommomToken({ 
             tokenID: tokenID,
             redeemed: false
         });
         mommomTokens[tokenID] = mommomToken; // track all tokens
         customers[msg.sender].ownedMommoms.push(tokenID); // track all customer tokens
-
+        
         emit EventBoughtFood(msg.sender, foodID, block.timestamp, tokenID);
+        lastTokenID[msg.sender] = tokenID;
+        getCustomerMommomsToken();
         return tokenID;
     }
 
@@ -95,6 +97,7 @@ contract Market {
         mommom.redeem(msg.sender, tokenID);
         mommomTokens[tokenID].redeemed = true;
         string memory foodID = mommom.tokenURI(tokenID);
+        getCustomerMommomsToken();
         emit EventRedeemFood(msg.sender, foodID, block.timestamp, tokenID);
     }
 
@@ -103,6 +106,7 @@ contract Market {
         mommom.gift(msg.sender, receiver, tokenID);
         customers[receiver].ownedMommoms.push(tokenID);
         string memory foodID = mommom.tokenURI(tokenID);
+        getCustomerMommomsToken();
         emit EventGiftFood(
             msg.sender,
             receiver,
@@ -125,16 +129,21 @@ contract Market {
         }
     }
 
-    function rewarded(string memory name, string memory symbol)
-        public
-        returns (address)
-    {
+    function rewarded(string memory name, string memory symbol) public returns (address){
         Reward reward = new Reward(name, symbol);
         reward.rewarded(msg.sender);
         return address(reward);
     }
 
-    function getCustomerMommoms() public view returns (uint256[] memory) {
-        return customers[msg.sender].ownedMommoms;
+    function getCustomerMommomsToken() public {
+        lastTokenList[msg.sender] = customers[msg.sender].ownedMommoms;
+    }
+
+    function getLastTokenList() public view returns(uint256[] memory) {
+        return lastTokenList[msg.sender];
+    }
+
+    function getFoodID(uint256 tokenID) public view returns(string memory) {
+        return mommom.tokenURI(tokenID);
     }
 }
