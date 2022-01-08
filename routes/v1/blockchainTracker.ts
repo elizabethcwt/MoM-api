@@ -210,10 +210,10 @@ export default class BlockchainTracker {
                     const logArray = [...logs];
                     const receivedCount = logArray.length;
 
-                    const data = await this.addFoodNames(logArray, userAddress);
+                    //const data = await this.addFoodNames(logArray, userAddress);
                     res.send({
                         count: receivedCount,
-                        data: data,
+                        data: '',
                         message: 'Success',
                     }).status(200);
                 } catch (err: any) {
