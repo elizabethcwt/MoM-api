@@ -109,6 +109,7 @@ export default class BlockchainTracker {
                     foodImageUrl: foodDetails.foodImageUrl,
                     restaurantName: foodDetails.restaurantName,
                     date: this.convertTimeFromUnix(event.args.date),
+                    tokenID: event.args.tokenID,
                 };
                 formattedLogs.unshift(logData);
             }
@@ -129,6 +130,7 @@ export default class BlockchainTracker {
                     foodImageUrl: foodDetails.foodImageUrl,
                     restaurantName: foodDetails.restaurantName,
                     date: this.convertTimeFromUnix(event.args.date),
+                    tokenID: event.args.tokenID,
                 };
                 formattedLogs.unshift(logData);
             }
