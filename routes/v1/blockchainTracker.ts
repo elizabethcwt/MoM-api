@@ -196,7 +196,10 @@ export default class BlockchainTracker {
                     const userAddress = req.params.walletAddress;
                     // Create filter for event
                     const dataFilter =
-                        this.marketContract.filters.EventGiftFood(userAddress);
+                        this.marketContract.filters.EventGiftFood(
+                            null,
+                            userAddress
+                        );
                     const startBlock = 0;
                     const endBlock = await this.provider.getBlockNumber();
                     const logs = await this.marketContract.queryFilter(
