@@ -228,6 +228,41 @@ export default class BlockchainTracker {
         );
 
         router.get(
+            '/sentgifts/:walletAddress',
+            async (req: Request, res: Response) => {
+                try {
+                    const userAddress = req.params.walletAddress;
+                    // Create filter for event
+                    const dataFilter =
+                        this.marketContract.filters.EventGiftFood(userAddress);
+                    const startBlock = 0;
+                    const endBlock = await this.provider.getBlockNumber();
+                    const logs = await this.marketContract.queryFilter(
+                        dataFilter,
+                        startBlock,
+                        endBlock
+                    );
+                    const logArray = [...logs];
+                    const receivedCount = logArray.length;
+
+                    const data = await this.addFoodNames(logArray, userAddress);
+                    res.send({
+                        count: receivedCount,
+                        data: data,
+                        message: 'Success',
+                    }).status(200);
+                } catch (err: any) {
+                    console.log(err.message);
+                    res.send({
+                        count: 0,
+                        data: '',
+                        message: err.message,
+                    }).status(500);
+                }
+            }
+        );
+
+        router.get(
             '/redeemedgifts/:walletAddress',
             async (req: Request, res: Response) => {
                 try {
