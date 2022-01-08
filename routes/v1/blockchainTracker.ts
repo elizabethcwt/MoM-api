@@ -79,7 +79,6 @@ export default class BlockchainTracker {
     async searchDatabase(searchItem: any) {
         const searchResult = await this.collection.find(searchItem);
         const array = await searchResult.toArray();
-        console.log(array);
         return array;
     }
 
@@ -95,47 +94,56 @@ export default class BlockchainTracker {
 
     async addFoodNames(logs: any[], userAddress: string) {
         const formattedLogs: any = [];
-        logs.map(async (event) => {
-            if (event.hasOwnProperty('args') && event.args) {
-                const foodDetails = await this.getFoodDetails(
-                    event.args.foodID
-                );
-                const userProfile = await this.searchDatabase({
-                    userWalletAddress: userAddress,
-                });
-                const logData = {
-                    sender: userProfile[0].userName,
-                    foodName: foodDetails.foodName,
-                    foodImageUrl: foodDetails.foodImageUrl,
-                    restaurantName: foodDetails.restaurantName,
-                    date: this.convertTimeFromUnix(event.args.date),
-                    tokenID: event.args.tokenId,
-                };
-                formattedLogs.unshift(logData);
-            }
+        return Promise.all(
+            logs.map(async (event) => {
+                if (event.hasOwnProperty('args') && event.args) {
+                    const foodDetails = await this.getFoodDetails(
+                        event.args.foodID
+                    );
+                    const userProfile = await this.searchDatabase({
+                        userWalletAddress: userAddress,
+                    });
+                    const logData = {
+                        sender: userProfile[0].userName,
+                        foodName: foodDetails.foodName,
+                        foodImageUrl: foodDetails.foodImageUrl,
+                        restaurantName: foodDetails.restaurantName,
+                        date: this.convertTimeFromUnix(event.args.date),
+                        tokenID: event.args.tokenId,
+                    };
+                    formattedLogs.unshift(logData);
+                }
+            })
+        ).then(() => {
+            console.log(formattedLogs);
+            return formattedLogs;
         });
-        return formattedLogs;
     }
 
     async formatAndAddNames(logs: any[], userAddress: string) {
         const formattedLogs: any = [];
-        logs.map(async (event) => {
-            if (event.hasOwnProperty('args') && event.args) {
-                const foodDetails = await this.getFoodDetails(
-                    event.args.foodID
-                );
-                const logData = {
-                    sender: userAddress,
-                    foodName: foodDetails.foodName,
-                    foodImageUrl: foodDetails.foodImageUrl,
-                    restaurantName: foodDetails.restaurantName,
-                    date: this.convertTimeFromUnix(event.args.date),
-                    tokenID: event.args.tokenId,
-                };
-                formattedLogs.unshift(logData);
-            }
+        return Promise.all(
+            logs.map(async (event) => {
+                if (event.hasOwnProperty('args') && event.args) {
+                    // console.log(event);
+                    const foodDetails = await this.getFoodDetails(
+                        event.args.foodID
+                    );
+                    const logData = {
+                        sender: userAddress,
+                        foodName: foodDetails.foodName,
+                        foodImageUrl: foodDetails.foodImageUrl,
+                        restaurantName: foodDetails.restaurantName,
+                        date: this.convertTimeFromUnix(event.args.date),
+                        tokenID: event.args.tokenId.toString(),
+                    };
+                    formattedLogs.unshift(logData);
+                }
+            })
+        ).then(() => {
+            console.log(formattedLogs);
+            return formattedLogs;
         });
-        return formattedLogs;
     }
 
     public routes(router: express.Router): void {
@@ -159,8 +167,12 @@ export default class BlockchainTracker {
                     );
                     const logArray = [...logs];
                     const buyCount = logArray.length;
-                    const data = this.formatAndAddNames(logArray, userAddress);
-                    console.log(`Total buy count: ${buyCount}`);
+                    const data = await this.formatAndAddNames(
+                        logArray,
+                        userAddress
+                    );
+                    console.log('DATA HERE');
+                    console.log(data);
                     res.send({
                         count: buyCount,
                         data: data,
@@ -195,8 +207,7 @@ export default class BlockchainTracker {
                     const logArray = [...logs];
                     const receivedCount = logArray.length;
 
-                    const data = this.addFoodNames(logArray, userAddress);
-                    console.log(`Total gift count: ${receivedCount}`);
+                    const data = await this.addFoodNames(logArray, userAddress);
                     res.send({
                         count: receivedCount,
                         data: data,
@@ -233,7 +244,10 @@ export default class BlockchainTracker {
                     const logArray = [...logs];
                     const receivedCount = logArray.length;
 
-                    const data = this.formatAndAddNames(logArray, userAddress);
+                    const data = await this.formatAndAddNames(
+                        logArray,
+                        userAddress
+                    );
                     console.log(`Total redeem count: ${receivedCount}`);
                     res.send({
                         count: receivedCount,
