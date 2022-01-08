@@ -116,6 +116,13 @@ contract Market {
         );
     }
 
+    function buyAndGift(string memory foodID, address receiver) public payable {
+        uint256 tokenID = buy(foodID);
+        gift(receiver, tokenID);
+        getCustomerMommomsToken();
+        lastTokenList[receiver] = customers[receiver].ownedMommoms;
+    }
+
     function revokeOwnership(address owner, uint256 tokenID) private {
         uint256 oldTokenBalance = mommom.balanceOf(msg.sender);
         Customer storage customer = customers[owner];
