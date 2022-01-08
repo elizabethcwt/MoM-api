@@ -9,17 +9,28 @@ contract Market {
     address payable admin;
 
     // WORK IN PROGRESS
-    event EventBoughtFood(address indexed user, string foodID, uint256 date);
+    event EventBoughtFood(
+        address indexed user,
+        string foodID,
+        uint256 date,
+        uint256 tokenId
+    );
 
     // WORK IN PROGRESS
-    event EventRedeemFood(address indexed user, string foodID, uint256 date);
+    event EventRedeemFood(
+        address indexed user,
+        string foodID,
+        uint256 date,
+        uint256 tokenId
+    );
 
     // WORK IN PROGRESS
     event EventGiftFood(
         address indexed user,
         address indexed receiver,
         string foodID,
-        uint256 date
+        uint256 date,
+        uint256 tokenId
     );
 
     struct MommomToken {
@@ -74,7 +85,7 @@ contract Market {
         mommomTokens[tokenID] = mommomToken; // track all tokens
         customers[msg.sender].ownedMommoms.push(tokenID); // track all customer tokens
 
-        emit EventBoughtFood(msg.sender, foodID, block.timestamp);
+        emit EventBoughtFood(msg.sender, foodID, block.timestamp, tokenID);
         return tokenID;
     }
 
@@ -84,7 +95,7 @@ contract Market {
         mommom.redeem(msg.sender, tokenID);
         mommomTokens[tokenID].redeemed = true;
         string memory foodID = mommom.tokenURI(tokenID);
-        emit EventRedeemFood(msg.sender, foodID, block.timestamp);
+        emit EventRedeemFood(msg.sender, foodID, block.timestamp, tokenID);
     }
 
     function gift(address receiver, uint256 tokenID) public {
@@ -92,7 +103,13 @@ contract Market {
         mommom.gift(msg.sender, receiver, tokenID);
         customers[receiver].ownedMommoms.push(tokenID);
         string memory foodID = mommom.tokenURI(tokenID);
-        emit EventGiftFood(msg.sender, receiver, foodID, block.timestamp);
+        emit EventGiftFood(
+            msg.sender,
+            receiver,
+            foodID,
+            block.timestamp,
+            tokenID
+        );
     }
 
     function revokeOwnership(address owner, uint256 tokenID) private {
